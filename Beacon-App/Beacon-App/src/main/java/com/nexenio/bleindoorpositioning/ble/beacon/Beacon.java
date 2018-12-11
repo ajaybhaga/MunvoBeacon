@@ -28,6 +28,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     protected UUID uuid;
     protected String macAddress;
+    protected String deviceName;
     protected int rssi; // in dBm
     protected int calibratedRssi; // in dBm
     protected int calibratedDistance; // in m
@@ -245,6 +246,14 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void setMacAddress(String macAddress) {
         this.macAddress = macAddress;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
     }
 
     public int getRssi() {

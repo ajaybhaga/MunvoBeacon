@@ -10,6 +10,7 @@ import java.util.Arrays;
 
 public abstract class AdvertisingPacket {
 
+    protected String deviceName;
     protected byte[] data;
     protected int rssi;
     protected long timestamp;
@@ -54,6 +55,10 @@ public abstract class AdvertisingPacket {
     public void setData(byte[] data) {
         this.data = data;
     }
+
+    public String getDeviceName() { return deviceName; };
+
+    public void setDeviceName(String deviceName) { this.deviceName = deviceName; };
 
     public int getRssi() {
         return rssi;

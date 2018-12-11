@@ -27,6 +27,12 @@ import java.util.Map;
 
 public class BeaconOffers extends BeaconView {
 
+    protected Paint zone0Paint;
+    protected Paint zone1Paint;
+    protected Paint zone2Paint;
+    protected int zone = 0;
+    protected int beaconNum = 0;
+
     /*
         Device drawing related variables
      */
@@ -92,6 +98,19 @@ public class BeaconOffers extends BeaconView {
         legendPaint.setStyle(Paint.Style.FILL);
         legendPaint.setColor(Color.BLACK);
         legendPaint.setAlpha(80);
+
+        zone0Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        zone0Paint.setStyle(Paint.Style.FILL);
+        zone0Paint.setColor(Color.rgb(10,10,10));
+
+        zone1Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        zone1Paint.setStyle(Paint.Style.FILL);
+        zone1Paint.setColor(Color.rgb(160,220,180));
+
+        zone2Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        zone2Paint.setStyle(Paint.Style.FILL);
+        zone2Paint.setColor(Color.rgb(220,220,160));
+
     }
 
     @Override
@@ -107,10 +126,9 @@ public class BeaconOffers extends BeaconView {
 
         deviceAccuracyAnimationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
         deviceStrokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * deviceAccuracyAnimationValue);
-
 //        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, whiteFillPaint);
 //        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, secondaryStrokePaint);
- //       canvas.drawCircle(canvasCenter.x, canvasCenter.y, pixelsPerDip * 8, secondaryFillPaint);
+//        canvas.drawCircle(canvasCenter.x, canvasCenter.y, pixelsPerDip * 8, secondaryFillPaint);
     }
 
     @Override
@@ -120,12 +138,56 @@ public class BeaconOffers extends BeaconView {
         for (Beacon beacon : beacons) {
             PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
             beaconCenterMap.put(beacon, beaconCenter);
-            drawBeaconBackground(canvas, beacon, beaconCenter);
+//            drawBeaconBackground(canvas, beacon, beaconCenter);
         }
+
+
+        boolean mvn1 = false;
+        boolean mvn2 = false;
+        boolean mvn3 = false;
+        boolean mvn4 = false;
+
+        float mvn1Rssi = -99.0f;
+        float mvn2Rssi = -99.0f;
+        float mvn3Rssi = -99.0f;
+        float mvn4Rssi = -99.0f;
+        
         // draw all foregrounds
         for (Beacon beacon : beacons) {
+
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn1"))) { // mvn1
+                mvn1 = true;
+                mvn1Rssi = beacon.getFilteredRssi();
+                beaconNum = 1;
+            }
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn2"))) { // mvn2
+                mvn2 = true;
+                mvn2Rssi = beacon.getFilteredRssi();
+                beaconNum = 2;
+            }
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn3"))) { // mvn3
+                mvn3 = true;
+                mvn3Rssi = beacon.getFilteredRssi();
+                beaconNum = 3;
+            }
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn4"))) { // mvn4
+                mvn4 = true;
+                mvn4Rssi = beacon.getFilteredRssi();
+                beaconNum = 4;
+            }
+
             drawBeaconForeground(canvas, beacon, beaconCenterMap.get(beacon));
         }
+
+
+
+        if (Math.max(mvn1Rssi, mvn2Rssi) > Math.max(mvn3Rssi, mvn4Rssi)) {
+            zone = 2;
+        } else {
+            zone = 1;
+        }
+
+        drawZone(canvas, zone);
     }
 
     /**
@@ -135,8 +197,26 @@ public class BeaconOffers extends BeaconView {
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
-        drawBeaconBackground(canvas, beacon, beaconCenter);
-        drawBeaconForeground(canvas, beacon, beaconCenter);
+        //drawBeaconBackground(canvas, beacon, beaconCenter);
+        //drawBeaconForeground(canvas, beacon, beaconCenter);
+    }
+
+    protected void drawZone(Canvas canvas, int zone) {
+
+        Paint zonePaint = zone0Paint;
+        RectF rect = new RectF((canvasWidth/2)+100, 0, canvasWidth, canvasHeight);
+
+        switch (zone) {
+            case 1:
+                zonePaint = zone1Paint;
+                break;
+
+            case 2:
+                zonePaint = zone2Paint;
+                break;
+        }
+
+        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, zonePaint);
     }
 
     protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
@@ -151,48 +231,77 @@ public class BeaconOffers extends BeaconView {
         beaconAccuracyAnimationValue *= Math.max(0, 1 - (timeSinceLastAdvertisement / 1000));
         beaconStrokeRadius = beaconRadius + (pixelsPerDip * 2) + (pixelsPerDip * 2 * beaconAccuracyAnimationValue);
 
-        RectF rect = new RectF(beaconCenter.x - beaconStrokeRadius, beaconCenter.y - beaconStrokeRadius, beaconCenter.x + beaconStrokeRadius, beaconCenter.y + beaconStrokeRadius);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
 
-        rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
     }
 
     protected void drawBeaconAttributeData(Canvas canvas) {
 
         int beaconYOffset = 0;
- //       for (Beacon beacon : beacons) {
-//            PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
-//            beaconCenterMap.put(beacon, beaconCenter);
-//            drawBeaconBackground(canvas, beacon, beaconCenter);
-            String[] field = new String[4];
-            field[0] = "Name";
-            field[1] = "UUID";
-            field[2] = "MAC Address";
-//            field[3] = "" + System.currentTimeMillis();
-            field[3] = "Detected Beacons";
+        for (Beacon beacon : beacons) {
+            PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
+            //beaconCenterMap.put(beacon, beaconCenter);
+            //drawBeaconBackground(canvas, beacon, beaconCenter);
 
-        String[] value = new String[4];
-        value[0] = "Name";
-        value[1] = "UUID";
-        value[2] = "MAC Address";
-//            field[3] = "" + System.currentTimeMillis();
-        value[3] = Integer.toString(getBeacons().size());
+        int numKeys = 30;
+        String[] key = new String[numKeys];
 
-        for (int i = 0; i < 4; i++) {
+        int k = 0;
+        key[k] = "Name";
+        key[++k] = "UUID";
+        key[++k] = "MAC Address";
+//        key[++k] = "Calibrated Distance"; // = 1 (tested)
+//        key[++k] = "Calibrated RSSI"; // = 0 (tested)
+        key[++k] = "Distance";
+        key[++k] = "Filtered RSSI";
+        key[++k] = "Latest Timestamp";
+        key[++k] = "RSSI";
+//        key[++k] = "Transmission Power"; // = 0 (tested)
+
+        String[] value = new String[numKeys];
+        k = 0;
+        value[k] = beacon.getDeviceName();
+
+        if (beacon.getUuid() != null) {
+            value[++k] = beacon.getUuid().toString();
+        } else {
+            value[++k] = "No UUID object.";
+        }
+
+        value[++k] = beacon.getMacAddress();
+//        value[++k] = "" + beacon.getCalibratedDistance();
+//        value[++k] = "" + beacon.getCalibratedRssi();
+        value[++k] = "" + beacon.getDistance();
+        value[++k] = "" + beacon.getFilteredRssi();
+        value[++k] = "" + beacon.getLatestTimestamp();
+        value[++k] = "" + beacon.getRssi();
+//        value[++k] = "" + beacon.getTransmissionPower();
+
+        for (int i = 0; i < 7; i++) {
                 // Show
                 canvas.drawText(
-                        field[i] + ": " + value[i],
+                        key[i] + ": " + value[i],
                         40,//canvasCenter.x,
                         40+(i*40)+beaconYOffset,
                         legendPaint
                 );
             }
 
-            beaconYOffset += (4*40)+40;
+            beaconYOffset += (8*40);
 
-     //   }
+        }
+
+        canvas.drawText(
+                "Zone: " + zone,
+                40,//canvasCenter.x,
+                40+(7*40)+beaconYOffset,
+                legendPaint);
+
+        canvas.drawText(
+                "Closest Beacon: " + beaconNum,
+                40,//canvasCenter.x,
+                40+(8*40)+beaconYOffset,
+                legendPaint);
+
 /*
         if (beacons.isEmpty()) {
             // Show

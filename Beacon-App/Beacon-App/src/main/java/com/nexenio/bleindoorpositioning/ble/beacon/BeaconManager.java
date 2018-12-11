@@ -51,10 +51,11 @@ public class BeaconManager {
         return instance;
     }
 
-    public static AdvertisingPacket processAdvertisingData(String macAddress, byte[] advertisingData, int rssi) {
+    public static AdvertisingPacket processAdvertisingData(String macAddress, String deviceName, byte[] advertisingData, int rssi) {
         AdvertisingPacket advertisingPacket = getInstance().advertisingPacketFactoryManager.createAdvertisingPacket(advertisingData);
         if (advertisingPacket != null) {
             advertisingPacket.setRssi(rssi);
+            advertisingPacket.setDeviceName(deviceName);
         } else {
             System.out.println("processAdvertisingData has empty advertising packet.");
         }
@@ -77,6 +78,9 @@ public class BeaconManager {
                 return advertisingPacket;
             }
             beacon.setMacAddress(macAddress);
+// TODO: Set UUID
+//            beacon.setUuid(advertisingPacket.);
+            beacon.setDeviceName(advertisingPacket.getDeviceName());
             instance.beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);

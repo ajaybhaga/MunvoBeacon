@@ -33,6 +33,34 @@ import rx.Subscription;
 public class BluetoothClient {
     final String nrfMACAddress = "66:55:44:33:22:11";
     final String piMACAddress = "B8:27:EB:B8:BE:59";
+    final String[] macAddressBeaconFilter = {
+                "B8:27:EB:B8:BE:59", // raspberry pi map server
+                "11:00:33:33:22:22", // nano nrf24 beacon
+                "22:00:33:33:22:22",
+                "33:00:33:33:22:22",
+                "44:00:33:33:22:22",
+                "55:00:33:33:22:22"
+    };
+
+    /*
+
+D/BluetoothClient: Processing scan result: [29.641] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [29.839] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -71
+D/BluetoothClient: Processing scan result: [30.054] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [30.155] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [29.937] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [30.454] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [29.734] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [30.238] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 -> -72
+D/BluetoothClient: Processing scan result: [30.356] munvo-beacon-map-svr-01 : B8:27:EB:B8:BE:59 D/-> -72
+
+
+Processing scan result: [29.839] mnvn2 : 22:00:33:33:22:22 -> -74
+D/BluetoothClient: Processing scan result: [30.271] mnvn1 : 11:00:33:33:22:22 -> -71
+D/BluetoothClient: Processing scan result: [30.271] mnvn2 : 22:00:33:33:22:22 -> -71
+D/BluetoothClient: Processing scan result: [29.586] mnvn3 : 33:00:33:33:22:22 -> -77
+D/BluetoothClient: Processing scan result: [30.288] mnvn4 : 44:00:33:33:22:22 -> -64
+     */
 
 
     private static final String TAG = BluetoothClient.class.getSimpleName();
@@ -76,6 +104,13 @@ public class BluetoothClient {
     }
 
     public static String getStatus() {
+
+        final BluetoothClient instance = getInstance();
+        Map<String, Beacon> beaconMap = instance.beaconManager.getBeaconMap();
+        Beacon closestBeacon = instance.beaconManager.getClosestBeacon();
+
+//        status = "Closest Beacon -> " + closestBeacon + ", Detected beacons -> " + beaconMap.toString();
+        status = "Detected beacons -> " + beaconMap.size();
         return status;
     }
 
@@ -86,8 +121,6 @@ public class BluetoothClient {
 
         final BluetoothClient instance = getInstance();
         Log.d(TAG, "Starting to scan for beacons");
-        status = "Starting to scan for beacons";
-
 
         ScanSettings scanSettings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -142,6 +175,7 @@ public class BluetoothClient {
 
     private void processScanResult(@NonNull ScanResult scanResult) {
         String macAddress = scanResult.getBleDevice().getMacAddress();
+        String deviceName = scanResult.getScanRecord().getDeviceName();
         byte[] data = scanResult.getScanRecord().getBytes();
 
 //        for (int i = 0; i < data.length; i++) {
@@ -150,25 +184,32 @@ public class BluetoothClient {
 
 
 //        if (macAddress.equalsIgnoreCase(nrfMACAddress) || macAddress.equalsIgnoreCase(piMACAddress)) {
+        for (int i = 0; i < macAddressBeaconFilter.length; i++) {
+            if (macAddress.equalsIgnoreCase(macAddressBeaconFilter[i])) {
 
-            Log.d(TAG, "Processing scan result: [" + ((System.currentTimeMillis() - appStartTime) / 1000.0f) + "] " + scanResult.getScanRecord().getDeviceName() + " : " + macAddress + " -> " + scanResult.getRssi());
-            status = "Processing scan result: [" + ((System.currentTimeMillis() - appStartTime) / 1000.0f) + "] " + macAddress + " -> " + scanResult.getRssi();
+                Log.d(TAG, "Processing scan result: [" + ((System.currentTimeMillis() - appStartTime) / 1000.0f) + "] " + scanResult.getScanRecord().getDeviceName() + " : " + macAddress + " -> " + scanResult.getRssi());
+                status = "Processing scan result: [" + ((System.currentTimeMillis() - appStartTime) / 1000.0f) + "] " + macAddress + " -> " + scanResult.getRssi();
 
-            AdvertisingPacket advertisingPacket = BeaconManager.processAdvertisingData(macAddress, data, scanResult.getRssi());
+                AdvertisingPacket advertisingPacket = BeaconManager.processAdvertisingData(macAddress, deviceName, data, scanResult.getRssi());
 
-            if (advertisingPacket != null) {
+                if (advertisingPacket != null) {
 
-//            Log.d(TAG, "Result: [" + ((System.currentTimeMillis()-appStartTime)/1000.0f) + "] " + advertisingPacket.getBeaconClass() + " -> " + advertisingPacket.toString());
 
-                Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
-                if (beacon instanceof IBeacon && !beacon.hasLocation()) {
-                    beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
+//                    Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());;
+            Log.d(TAG, "Result: [" + ((System.currentTimeMillis()-appStartTime)/1000.0f) + "] " + advertisingPacket.getBeaconClass() + " -> " + advertisingPacket.toString());
+/*
+                    Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
+                    if (beacon instanceof IBeacon && !beacon.hasLocation()) {
+                        beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
+                    }
+
+  */
+                } else {
+                    Log.d(TAG, "Result: [" + ((System.currentTimeMillis() - appStartTime) / 1000.0f) + "] advertisingPacket -> empty.");
                 }
-            } else {
-                Log.d(TAG, "Result: [" + ((System.currentTimeMillis() - appStartTime) / 1000.0f) + "] advertisingPacket -> empty.");
             }
         }
-  //  }
+    }
 
     private static IBeaconLocationProvider<IBeacon> createDebuggingLocationProvider(IBeacon iBeacon) {
         final Location beaconLocation = new Location();
