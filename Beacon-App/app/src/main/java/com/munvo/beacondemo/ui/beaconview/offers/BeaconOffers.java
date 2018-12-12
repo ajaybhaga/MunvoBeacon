@@ -28,6 +28,8 @@ public class BeaconOffers extends BeaconView {
     protected Paint zone0Paint;
     protected Paint zone1Paint;
     protected Paint zone2Paint;
+    protected Paint zone3Paint;
+    protected Paint zoneTextPaint;
     protected int zone = 0;
     protected int beaconNum = 0;
 
@@ -95,7 +97,13 @@ public class BeaconOffers extends BeaconView {
         legendPaint.setTextSize(pixelsPerDip * 12);
         legendPaint.setStyle(Paint.Style.FILL);
         legendPaint.setColor(Color.BLACK);
-        legendPaint.setAlpha(80);
+        legendPaint.setAlpha(100);
+
+        zoneTextPaint = new Paint(textPaint);
+        zoneTextPaint.setTextSize(pixelsPerDip * 48);
+        zoneTextPaint.setStyle(Paint.Style.FILL);
+        zoneTextPaint.setColor(Color.BLACK);
+        zoneTextPaint.setAlpha(90);
 
         zone0Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         zone0Paint.setStyle(Paint.Style.FILL);
@@ -108,6 +116,10 @@ public class BeaconOffers extends BeaconView {
         zone2Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         zone2Paint.setStyle(Paint.Style.FILL);
         zone2Paint.setColor(Color.rgb(220,220,160));
+
+        zone3Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        zone3Paint.setStyle(Paint.Style.FILL);
+        zone3Paint.setColor(Color.rgb(120,140,240));
 
     }
 
@@ -210,19 +222,31 @@ public class BeaconOffers extends BeaconView {
     protected void drawZone(Canvas canvas, int zone) {
 
         Paint zonePaint = zone0Paint;
-        RectF rect = new RectF((canvasWidth/2)+100, 0, canvasWidth, canvasHeight);
+        RectF rect = new RectF(0, 0, canvasWidth, canvasHeight);
 
         switch (zone) {
             case 1:
-                zonePaint = zone1Paint;
+                zonePaint = zone3Paint;
                 break;
 
             case 2:
                 zonePaint = zone2Paint;
                 break;
+
+            case 3:
+                zonePaint = zone3Paint;
+                break;
         }
 
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, zonePaint);
+
+
+        canvas.drawText(
+                "ZONE " + zone,
+                (canvasWidth/2)-180,
+                canvasHeight-40,
+                zoneTextPaint);
+
     }
 
     protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
@@ -253,7 +277,7 @@ public class BeaconOffers extends BeaconView {
 
         int k = 0;
         key[k] = "Name";
-        key[++k] = "UUID";
+//        key[++k] = "UUID";
         key[++k] = "MAC Address";
 //        key[++k] = "Calibrated Distance"; // = 1 (tested)
 //        key[++k] = "Calibrated RSSI"; // = 0 (tested)
@@ -266,12 +290,12 @@ public class BeaconOffers extends BeaconView {
         String[] value = new String[numKeys];
         k = 0;
         value[k] = beacon.getDeviceName();
-
+        /*
         if (beacon.getUuid() != null) {
             value[++k] = beacon.getUuid().toString();
         } else {
             value[++k] = "No UUID object.";
-        }
+        }*/
 
         value[++k] = beacon.getMacAddress();
 //        value[++k] = "" + beacon.getCalibratedDistance();
@@ -282,12 +306,12 @@ public class BeaconOffers extends BeaconView {
         value[++k] = "" + beacon.getRssi();
 //        value[++k] = "" + beacon.getTransmissionPower();
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
                 // Show
                 canvas.drawText(
                         key[i] + ": " + value[i],
-                        40,//canvasCenter.x,
-                        40+(i*40)+beaconYOffset,
+                        20,//canvasCenter.x,
+                        80+(i*40)+beaconYOffset,
                         legendPaint
                 );
             }
@@ -296,16 +320,18 @@ public class BeaconOffers extends BeaconView {
 
         }
 
+        /* Global attributes */
+        /*
         canvas.drawText(
                 "Zone: " + zone,
                 40,//canvasCenter.x,
                 40+(7*40)+beaconYOffset,
                 legendPaint);
-
+*/
         canvas.drawText(
                 "Closest Beacon: " + beaconNum,
                 40,//canvasCenter.x,
-                40+(8*40)+beaconYOffset,
+                0+(1*40)+beaconYOffset,
                 legendPaint);
 
 /*

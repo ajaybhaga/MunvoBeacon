@@ -22,6 +22,8 @@ import com.munvo.beacondemo.ui.beaconview.chart.BeaconChartFragment;
 import com.munvo.beacondemo.ui.beaconview.map.BeaconMapFragment;
 import com.munvo.beacondemo.ui.beaconview.radar.BeaconRadarFragment;
 import com.munvo.beacondemo.ui.beaconview.offers.BeaconOffersFragment;
+import com.munvo.beacondemo.R;
+
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -40,7 +42,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         coordinatorLayout = findViewById(R.id.coordinatorLayout);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        bottomNavigationView.setSelectedItemId(R.id.navigation_radar);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_offers);
 
         // Set default text
         textStatus = (TextView)findViewById(R.id.textStatus);

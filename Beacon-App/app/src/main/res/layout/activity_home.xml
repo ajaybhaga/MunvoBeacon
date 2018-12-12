@@ -29,7 +29,7 @@
             android:layout_weight="1">
 
         <FrameLayout
-                android:id="@+id/frametuLayout"
+                android:id="@+id/frameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true"/>
