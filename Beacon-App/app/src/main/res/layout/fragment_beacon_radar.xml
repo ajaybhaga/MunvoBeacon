@@ -1,7 +1,7 @@
-<com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar.BeaconRadar
+<com.munvo.beacondemo.ui.beaconview.radar.BeaconRadar
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        tools:context="com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar.BeaconRadarFragment"
+        tools:context="com.munvo.beacondemo.ui.beaconview.radar.BeaconRadarFragment"
         tools:showIn="@layout/activity_home"
         android:id="@+id/beaconRadar"
         android:layout_width="match_parent"

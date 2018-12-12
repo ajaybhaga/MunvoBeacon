@@ -32,12 +32,12 @@ def releaseVersionCode = 14
 def releaseVersionName = "0.3.8"
 
 def projectName = 'Beacon-App'
-def projectDescription = 'Java library for indoor positioning using bluetooth beacons'
-def projectGroupId = 'com.nexenio.bleindoorpositioning'
+def projectDescription = 'Beacon positioning and marketing system integration demo'
+def projectGroupId = 'com.munvo.beacondemo'
 def projectArtifactId = 'core'
 
-def repositoryName = "BLE-Indoor-Positioning"
-def repositoryUrl = "https://github.com/neXenio/${repositoryName}"
+def repositoryName = "MunvoBeacon"
+def repositoryUrl = "https://github.com/ajaybhaga/${repositoryName}"
 def versionControlUrl = "${repositoryUrl}.git"
 
 bintray {
@@ -49,7 +49,7 @@ bintray {
     pkg {
         repo = repositoryName
         name = repositoryName
-        userOrg = 'nexenio'
+        userOrg = 'munvo'
         licenses = ['Apache-2.0']
         labels = ['Indoor', 'Positioning', 'Bluetooth', 'Beacon']
         vcsUrl = versionControlUrl
@@ -85,9 +85,9 @@ def pomConfig = {
     }
     developers {
         developer {
-            id "neXenio"
-            name "neXenio"
-            email "info@nexenio.com"
+            id "Munvo"
+            name "Ajay Bhaga"
+            email "ajaybhaga@munvo.com"
         }
     }
     scm {
