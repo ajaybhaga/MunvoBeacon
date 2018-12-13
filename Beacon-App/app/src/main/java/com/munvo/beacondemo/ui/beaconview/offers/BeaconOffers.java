@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
+import com.munvo.beacondemo.ZoneDetector;
 import com.munvo.beacondemo.ui.LocationAnimator;
 import com.munvo.beacondemo.ui.beaconview.BeaconView;
 import com.munvo.beaconlocate.ble.advertising.AdvertisingPacket;
@@ -31,7 +32,8 @@ public class BeaconOffers extends BeaconView {
     protected Paint zone3Paint;
     protected Paint zoneTextPaint;
     protected int zone = 0;
-    protected int beaconNum = 0;
+
+    protected ZoneDetector zoneDetector = new ZoneDetector();
 
     /*
         Device drawing related variables
@@ -149,54 +151,13 @@ public class BeaconOffers extends BeaconView {
             PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
             beaconCenterMap.put(beacon, beaconCenter);
 //            drawBeaconBackground(canvas, beacon, beaconCenter);
-        }
-
-
-        boolean mvn1 = false;
-        boolean mvn2 = false;
-        boolean mvn3 = false;
-        boolean mvn4 = false;
-
-        float mvn1Rssi = -99.0f;
-        float mvn2Rssi = -99.0f;
-        float mvn3Rssi = -99.0f;
-        float mvn4Rssi = -99.0f;
-
-        // draw all foregrounds
-        for (Beacon beacon : beacons) {
-
-            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn1"))) { // mvn1
-                mvn1 = true;
-                mvn1Rssi = beacon.getFilteredRssi();
-                beaconNum = 1;
-            }
-            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn2"))) { // mvn2
-                mvn2 = true;
-                mvn2Rssi = beacon.getFilteredRssi();
-                beaconNum = 2;
-            }
-            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn3"))) { // mvn3
-                mvn3 = true;
-                mvn3Rssi = beacon.getFilteredRssi();
-                beaconNum = 3;
-            }
-            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn4"))) { // mvn4
-                mvn4 = true;
-                mvn4Rssi = beacon.getFilteredRssi();
-                beaconNum = 4;
-            }
-
             drawBeaconForeground(canvas, beacon, beaconCenterMap.get(beacon));
         }
 
+        // Load zone
+        zone = zoneDetector.getZone(beacons);
 
-
-        if (Math.max(mvn1Rssi, mvn2Rssi) > Math.max(mvn3Rssi, mvn4Rssi)) {
-            zone = 2;
-        } else {
-            zone = 1;
-        }
-
+        // Draw zone
         drawZone(canvas, zone);
 
         // Zone is detected
@@ -206,7 +167,7 @@ public class BeaconOffers extends BeaconView {
 
     protected void updateZone() {
 
-        }
+    }
 
     /**
      * This shouldn't be called, because the created beacon background may overlay existing beacon
@@ -328,12 +289,13 @@ public class BeaconOffers extends BeaconView {
                 40+(7*40)+beaconYOffset,
                 legendPaint);
 */
+        /*
         canvas.drawText(
                 "Closest Beacon: " + beaconNum,
                 40,//canvasCenter.x,
                 0+(1*40)+beaconYOffset,
                 legendPaint);
-
+*/
 /*
         if (beacons.isEmpty()) {
             // Show

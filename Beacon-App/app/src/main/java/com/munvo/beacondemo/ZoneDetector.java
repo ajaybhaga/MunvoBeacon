@@ -1,5 +1,5 @@
 package com.munvo.beacondemo;
-/*
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -46,19 +46,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.Manifest;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import android.util.Base64;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -72,70 +61,128 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 //import java.util.jar.Manifest;
-*/
+
+import com.munvo.beaconlocate.ble.beacon.Beacon;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.net.ssl.HttpsURLConnection;
 
 
 public class ZoneDetector {
-/*
-        LocationManager locationManager;
-        LocationListener locationListener;
-        String json;
-        String base64;
-        String name;
-        @Override
-        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+    List<Integer> zones = new ArrayList<Integer>();
+    String json;
+    String base64;
+    String name;
+    //  String json;
 
-                    return;
-                }
+    // Topics:
+    // zone -> 3 mins last 5 zones
+    // context -> app populate text message
+    // behaviour -> zone pattern match and context then publish action
+    // action -> read action offer
 
+    protected int beaconNum = 0;
+
+    boolean mvn1 = false;
+    boolean mvn2 = false;
+    boolean mvn3 = false;
+    boolean mvn4 = false;
+
+    float mvn1Rssi = -99.0f;
+    float mvn2Rssi = -99.0f;
+    float mvn3Rssi = -99.0f;
+    float mvn4Rssi = -99.0f;
+
+    public int getZone(List<Beacon> beacons) {
+        int zone = 0;
+
+        // draw all foregrounds
+        for (Beacon beacon : beacons) {
+
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn1"))) { // mvn1
+                mvn1 = true;
+                mvn1Rssi = beacon.getFilteredRssi();
+                beaconNum = 1;
+            }
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn2"))) { // mvn2
+                mvn2 = true;
+                mvn2Rssi = beacon.getFilteredRssi();
+                beaconNum = 2;
+            }
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn3"))) { // mvn3
+                mvn3 = true;
+                mvn3Rssi = beacon.getFilteredRssi();
+                beaconNum = 3;
+            }
+            if ((beacon.getDeviceName().equalsIgnoreCase("mnvn4"))) { // mvn4
+                mvn4 = true;
+                mvn4Rssi = beacon.getFilteredRssi();
+                beaconNum = 4;
             }
 
         }
-        //  String json;
+
+        boolean zoneListUpdate = false;
 
 
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-        public void trackme(View view) throws UnsupportedEncodingException {
+        if (Math.max(mvn1Rssi, mvn2Rssi) > Math.max(mvn3Rssi, mvn4Rssi)) {
+            zone = 2;
+        } else {
+            zone = 1;
+        }
 
-            EditText username = (EditText) findViewById(R.id.editText2);
-            if (username.getText().toString().trim().length() <= 0) {
-                Toast.makeText(this," Name field is blank", Toast.LENGTH_SHORT).show();
-            } else {
-                name = username.getText().toString();
-                // Toast.makeText(this, " Name = =  " + name, Toast.LENGTH_SHORT).show();
-                // byte[] data = name.getBytes("UTF-8");
-                //  base64 = "\""+ Base64.encodeToString(data, Base64.DEFAULT).trim();
-                //Log.d ("This is the name  ", base64);
+        if (zones.isEmpty()) {
+            zones.add(zone);
+            zoneListUpdate = true;
+        }
 
-                locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        // Last element do not match current zone
+        if (zones.get(zones.size()-1) != zone) {
+            zones.add(zone);
+            zoneListUpdate = true;
+        }
 
-                locationListener = new LocationListener() {
-                    @Override
-                    public void onLocationChanged(android.location.Location location) {
-                        String full = name + "," + String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude());
+        if (zoneListUpdate)
+            publishZoneSeries(100, zones);
 
-                        byte[] data = new byte[0];
-                        try {
-                            data = full.getBytes("UTF-8");
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        base64 = "\""+ Base64.encodeToString(data, Base64.DEFAULT).trim();
-                        Log.d ("This is the FULL  ", base64);
+        return zone;
+    }
 
-                        json = " {\n" +
-                                "  \"records\": [\n" +
-                                "    {\n" +
-                                "      \"value\" :"+base64 +"\""+
-                                "    }\n" +
-                                "  ]\n" +
-                                "}\n";
+    public void publishZoneSeries(int custId, List<Integer> zones) {
+
+        String zoneSeries = "[";
+        for (int i = 0; i < zones.size(); i++) {
+            zoneSeries += String.valueOf(zones.get(i));
+
+            if (i != zones.size()-1)
+                zoneSeries += ",";
+        }
+        zoneSeries += "]";
+
+        String full = String.valueOf(custId) + "," + zoneSeries;
+
+
+        System.out.println("Publishing -> " + full);
+
+        byte[] data = new byte[0];
+        try {
+            data = full.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        base64 = "\"" + Base64.encodeToString(data, Base64.DEFAULT).trim();
+        Log.d("This is the FULL  ", base64);
+
+        json = " {\n" +
+                "  \"records\": [\n" +
+                "    {\n" +
+                "      \"value\" :" + base64 + "\"" +
+                "    }\n" +
+                "  ]\n" +
+                "}\n";
 
 
 /*
@@ -148,112 +195,62 @@ public class ZoneDetector {
                         ]
                     }
                     '*/
-/*
-                        Log.i("Json ", json);
 
-                        DownloadTask task = new DownloadTask();
-                        task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/kafka-java-console-sample-topic");
-                    }
+        Log.i("Json ", json);
 
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-                    }
-                };
-
-                //explicitly ask user for permission
-
-                // check if we already have permission
-                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-
-                    //ask for permission
-                    ActivityCompat.requestPermissions(this,new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                }else{
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-                }
-
-
-            }
-
-
-        }
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-
-
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-
-
-
-
-        }
-
-
-
-
-
-
-        public class DownloadTask extends AsyncTask<String, Void, String> {
-
-
-            @Override
-            protected String doInBackground(String... urls) {
-
-                String result = "";
-                URL url;
-                HttpsURLConnection urlConnection = null;
-                try {
-
-                    url = new URL(urls[0]);
-                    urlConnection = (HttpsURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("POST");
-                    urlConnection.setRequestProperty("X-Auth-Token","XAQ1MnwCNySJwPWziVsJXDKKlo8bVrV440D70HfiMfqR9oJQ");
-                    urlConnection.setRequestProperty("Content-Type", "application/vnd.kafka.binary.v1+json");
-
-                    DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                    wr.writeBytes(json);
-                    wr.flush();
-                    wr.close();
-
-                    InputStream in = urlConnection.getInputStream();
-                    InputStreamReader reader = new InputStreamReader(in);
-                    int data = reader.read();
-                    while (data != -1){
-                        char current = (char) data;
-                        result += current;
-                        data = reader.read();
-                    }
-
-                    return result;
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-
-
-            @Override
-            protected void onPostExecute(String s){
-                super.onPostExecute(s);
-
-                Log.d("Message Sent", s);
-
-            }
-        }
-*/
-
+        DownloadTask task = new DownloadTask();
+        task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/zone");
     }
+
+    public class DownloadTask extends AsyncTask<String, Void, String> {
+
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String result = "";
+            URL url;
+            HttpsURLConnection urlConnection = null;
+            try {
+
+                url = new URL(urls[0]);
+                urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("X-Auth-Token", "XAQ1MnwCNySJwPWziVsJXDKKlo8bVrV440D70HfiMfqR9oJQ");
+                urlConnection.setRequestProperty("Content-Type", "application/vnd.kafka.binary.v1+json");
+
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(json);
+                wr.flush();
+                wr.close();
+
+                InputStream in = urlConnection.getInputStream();
+                InputStreamReader reader = new InputStreamReader(in);
+                int data = reader.read();
+                while (data != -1) {
+                    char current = (char) data;
+                    result += current;
+                    data = reader.read();
+                }
+
+                return result;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            Log.d("Message Sent", s);
+
+        }
+    }
+
+}
