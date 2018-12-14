@@ -30,6 +30,7 @@ public class BeaconOffers extends BeaconView {
     protected Paint zone1Paint;
     protected Paint zone2Paint;
     protected Paint zone3Paint;
+    protected Paint zone4Paint;
     protected Paint zoneTextPaint;
     protected int zone = 0;
 
@@ -123,6 +124,10 @@ public class BeaconOffers extends BeaconView {
         zone3Paint.setStyle(Paint.Style.FILL);
         zone3Paint.setColor(Color.rgb(120,140,240));
 
+        zone4Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        zone4Paint.setStyle(Paint.Style.FILL);
+        zone4Paint.setColor(Color.rgb(20,240,120));
+
     }
 
     @Override
@@ -197,10 +202,14 @@ public class BeaconOffers extends BeaconView {
             case 3:
                 zonePaint = zone3Paint;
                 break;
+
+            case 4:
+                zonePaint = zone4Paint;
+                break;
+
         }
 
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, zonePaint);
-
 
         canvas.drawText(
                 "ZONE " + zone,
@@ -282,13 +291,13 @@ public class BeaconOffers extends BeaconView {
         }
 
         /* Global attributes */
-        /*
+
         canvas.drawText(
-                "Zone: " + zone,
+                "Zone Series: " + zoneDetector.getZoneSeries(),
                 40,//canvasCenter.x,
                 40+(7*40)+beaconYOffset,
                 legendPaint);
-*/
+
         /*
         canvas.drawText(
                 "Closest Beacon: " + beaconNum,

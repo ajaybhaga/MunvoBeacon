@@ -72,6 +72,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class ZoneDetector {
 
+    long lastZoneRefresh;
+
     List<Integer> zones = new ArrayList<Integer>();
     String json;
     String base64;
@@ -127,28 +129,66 @@ public class ZoneDetector {
 
         boolean zoneListUpdate = false;
 
+        if ((mvn1Rssi > mvn2Rssi) && (mvn1Rssi > mvn3Rssi) && (mvn1Rssi > mvn4Rssi)) {
+            zone = 1;
+        }
 
+        if ((mvn2Rssi > mvn1Rssi) && (mvn2Rssi > mvn3Rssi) && (mvn2Rssi > mvn4Rssi)) {
+            zone = 2;
+        }
+
+        if ((mvn3Rssi > mvn1Rssi) && (mvn3Rssi > mvn2Rssi) && (mvn3Rssi > mvn4Rssi)) {
+            zone = 3;
+        }
+
+        if ((mvn4Rssi > mvn1Rssi) && (mvn4Rssi > mvn2Rssi) && (mvn4Rssi > mvn3Rssi)) {
+            zone = 4;
+        }
+
+        /*
         if (Math.max(mvn1Rssi, mvn2Rssi) > Math.max(mvn3Rssi, mvn4Rssi)) {
             zone = 2;
         } else {
             zone = 1;
-        }
+        }*/
 
         if (zones.isEmpty()) {
             zones.add(zone);
             zoneListUpdate = true;
+            lastZoneRefresh = System.currentTimeMillis();
         }
 
         // Last element do not match current zone
         if (zones.get(zones.size()-1) != zone) {
             zones.add(zone);
             zoneListUpdate = true;
+            lastZoneRefresh = System.currentTimeMillis();
+        }
+
+        // Maximum series of 4
+        if (((System.currentTimeMillis()-lastZoneRefresh) > 4000.0f) || (zones.size() > 4)) {
+            zones.remove(0);
+            lastZoneRefresh = System.currentTimeMillis();
         }
 
         if (zoneListUpdate)
             publishZoneSeries(100, zones);
 
         return zone;
+    }
+
+    public String getZoneSeries() {
+
+        String zoneSeries = "[";
+        for (int i = 0; i < zones.size(); i++) {
+            zoneSeries += String.valueOf(zones.get(i));
+
+            if (i != zones.size()-1)
+                zoneSeries += ",";
+        }
+        zoneSeries += "]";
+
+        return zoneSeries;
     }
 
     public void publishZoneSeries(int custId, List<Integer> zones) {
