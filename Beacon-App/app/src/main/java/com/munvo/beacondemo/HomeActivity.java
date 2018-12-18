@@ -20,9 +20,12 @@ import com.munvo.beacondemo.bluetooth.BluetoothClient;
 import com.munvo.beacondemo.location.AndroidLocationProvider;
 import com.munvo.beacondemo.ui.beaconview.chart.BeaconChartFragment;
 import com.munvo.beacondemo.ui.beaconview.map.BeaconMapFragment;
-import com.munvo.beacondemo.ui.beaconview.radar.BeaconRadarFragment;
+import com.munvo.beacondemo.ui.beaconview.log.BeaconLogFragment;
 import com.munvo.beacondemo.ui.beaconview.offers.BeaconOffersFragment;
 import com.munvo.beacondemo.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -32,6 +35,13 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     private CoordinatorLayout coordinatorLayout;
     private BottomNavigationView bottomNavigationView;
     private TextView textStatus;
+
+    // Data Buffer
+    private List<String> logBuffer;
+    long lastLogRefresh = 0;
+    protected ZoneDetector zoneDetector;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +58,20 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         textStatus = (TextView)findViewById(R.id.textStatus);
         textStatus.setText("-");
 
+        logBuffer = new ArrayList<String>(100);
+        zoneDetector = new ZoneDetector(logBuffer);
+
         // setup location
         AndroidLocationProvider.initialize(this);
 
         // setup bluetooth
         BluetoothClient.initialize(this);
     }
+
+    public List<String> getLogBuffer() {
+        return logBuffer;
+    }
+    public ZoneDetector getZoneDetector() { return zoneDetector; }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -94,8 +112,8 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
                 break;
             }
 
-            case R.id.navigation_radar: {
-                selectedFragment = new BeaconRadarFragment();
+            case R.id.navigation_log: {
+                selectedFragment = new BeaconLogFragment();
                 break;
             }
             case R.id.navigation_chart: {
@@ -128,6 +146,8 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         }
         BluetoothClient.startScanning();
         textStatus.setText(BluetoothClient.getStatus());
+
+        logBuffer.add(System.currentTimeMillis()+ ": Resumed.");
     }
 
     @Override
@@ -138,6 +158,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         // stop observing bluetooth
         BluetoothClient.stopScanning();
         textStatus.setText(BluetoothClient.getStatus());
+        logBuffer.add(System.currentTimeMillis()+ ": Paused.");
 
         super.onPause();
     }

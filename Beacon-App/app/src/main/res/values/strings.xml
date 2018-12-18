@@ -18,8 +18,8 @@
     <!-- Map -->
     <string name="title_map">Map</string>
 
-    <!-- Radar-->
-    <string name="title_radar">Radar</string>
+    <!-- Log-->
+    <string name="title_log">Log</string>
 
     <!-- Chart -->
     <string name="title_chart">Chart</string>

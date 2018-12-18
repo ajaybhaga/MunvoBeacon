@@ -12,9 +12,9 @@
             android:title="@string/title_map"/>
 
     <item
-            android:id="@+id/navigation_radar"
-            android:icon="@drawable/radar"
-            android:title="@string/title_radar"/>
+            android:id="@+id/navigation_log"
+            android:icon="@drawable/tune"
+            android:title="@string/title_log"/>
 
     <item
             android:id="@+id/navigation_chart"

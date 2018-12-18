@@ -1,4 +1,4 @@
-package com.munvo.beacondemo.ui.beaconview.radar;
+package com.munvo.beacondemo.ui.beaconview.log;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -9,7 +9,10 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.widget.LinearLayout;
 
+import com.munvo.beacondemo.HomeActivity;
+import com.munvo.beacondemo.ZoneDetector;
 import com.munvo.beacondemo.ui.LocationAnimator;
 import com.munvo.beacondemo.ui.beaconview.BeaconView;
 import com.munvo.beaconlocate.ble.advertising.AdvertisingPacket;
@@ -17,15 +20,22 @@ import com.munvo.beaconlocate.ble.beacon.Beacon;
 import com.munvo.beaconlocate.location.Location;
 import com.munvo.beaconlocate.location.distance.DistanceUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by steppschuh on 16.11.17.
  */
 
-public class BeaconRadar extends BeaconView {
+public class BeaconLog extends BeaconView {
+
+    protected int zone = 0;
+    protected List<Integer> zoneSeries = new ArrayList<Integer>(5);
+    protected List<String> logBuffer;
 
     /*
         Device drawing related variables
@@ -66,21 +76,32 @@ public class BeaconRadar extends BeaconView {
     protected double locationRadius;
     protected double locationRotationAngle;
 
-    public BeaconRadar(Context context) {
+    public BeaconLog(Context context) {
         super(context);
     }
 
-    public BeaconRadar(Context context, @Nullable AttributeSet attrs) {
+    public BeaconLog(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public BeaconRadar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public BeaconLog(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public BeaconRadar(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public BeaconLog(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
+
+    public void setZoneData(List<Integer> zoneSeries) {
+        this.zoneSeries = zoneSeries;
+        refresh();
+    }
+
+    public void setLogBuffer(List<String> logBuffer) {
+        this.logBuffer = logBuffer;
+        refresh();
+    }
+
 
     @Override
     public void initialize() {
@@ -89,28 +110,59 @@ public class BeaconRadar extends BeaconView {
         startDeviceAngleAnimation(0);
         legendPaint = new Paint(textPaint);
         legendPaint.setTextSize(pixelsPerDip * 12);
-        legendPaint.setStyle(Paint.Style.STROKE);
+        legendPaint.setStyle(Paint.Style.FILL);
         legendPaint.setColor(Color.BLACK);
         legendPaint.setAlpha(50);
+
+
+
+        Random r = new Random();
+    /*
+        TEST DATA
+
+    for (int i = 0; i < 255; i++) {
+            long rand = r.nextLong();
+            logBuffer.append(rand);
+            logBuffer.append("|");
+        }*/
     }
+
+
+    protected void drawLogData(Canvas canvas) {
+        if ((logBuffer != null) && !logBuffer.isEmpty()) {
+
+            int numKeys = 30;
+            String[] key = new String[numKeys];
+            String[] value = new String[numKeys];
+
+            for (int k = 0; k < Math.min(logBuffer.size(), numKeys); k++) {
+                key[k] = "[" + k + "]";
+                value[k] = logBuffer.get(k);
+            }
+            for (int i = 0; i < Math.min(logBuffer.size(), numKeys); i++) {
+                // Show
+                canvas.drawText(
+                        key[i] + " -> " + value[i],
+                        20,//canvasCenter.x,
+                        80 + (i * 40),
+                        legendPaint
+                );
+            }
+        }
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawLegend(canvas);
+
+        drawLogData(canvas);
     }
 
     @Override
     protected void drawDevice(Canvas canvas) {
-        deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
-        deviceAdvertisingRadius = getCanvasUnitsFromMeters(deviceAdvertisingRange);
 
-        deviceAccuracyAnimationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
-        deviceStrokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * deviceAccuracyAnimationValue);
-
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, whiteFillPaint);
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, secondaryStrokePaint);
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, pixelsPerDip * 8, secondaryFillPaint);
+//        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, whiteFillPaint);
     }
 
     @Override
@@ -122,10 +174,6 @@ public class BeaconRadar extends BeaconView {
             beaconCenterMap.put(beacon, beaconCenter);
             drawBeaconBackground(canvas, beacon, beaconCenter);
         }
-        // draw all foregrounds
-        for (Beacon beacon : beacons) {
-            drawBeaconForeground(canvas, beacon, beaconCenterMap.get(beacon));
-        }
     }
 
     /**
@@ -136,54 +184,9 @@ public class BeaconRadar extends BeaconView {
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
         drawBeaconBackground(canvas, beacon, beaconCenter);
-        drawBeaconForeground(canvas, beacon, beaconCenter);
     }
 
     protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
-
-    }
-
-    protected void drawBeaconForeground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
-        AdvertisingPacket latestAdvertisingPacket = beacon.getLatestAdvertisingPacket();
-        timeSinceLastAdvertisement = latestAdvertisingPacket != null ? System.currentTimeMillis() - latestAdvertisingPacket.getTimestamp() : 0;
-
-        beaconAccuracyAnimationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
-        beaconAccuracyAnimationValue *= Math.max(0, 1 - (timeSinceLastAdvertisement / 1000));
-        beaconStrokeRadius = beaconRadius + (pixelsPerDip * 2) + (pixelsPerDip * 2 * beaconAccuracyAnimationValue);
-
-        RectF rect = new RectF(beaconCenter.x - beaconStrokeRadius, beaconCenter.y - beaconStrokeRadius, beaconCenter.x + beaconStrokeRadius, beaconCenter.y + beaconStrokeRadius);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
-
-        rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
-    }
-
-    protected void drawLegend(Canvas canvas) {
-        referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance((float) maximumDistanceAnimator.getAnimatedValue());
-        referenceDistanceStep = Math.round(referenceDistance / (float) referenceLineCount);
-
-        // include some more (+ 5) lines that are needed to avoid white space
-        for (int i = referenceLineCount + 5; i > 0; i--) {
-            currentReferenceDistance = Math.round(i * referenceDistanceStep);
-            currentReferenceCanvasUnits = getCanvasUnitsFromMeters(currentReferenceDistance);
-
-            canvas.drawCircle(
-                    canvasCenter.x,
-                    canvasCenter.y,
-                    currentReferenceCanvasUnits,
-                    legendPaint
-            );
-
-            referenceText = String.format(Locale.US, "%.0f", currentReferenceDistance) + "m";
-            referenceTextWidth = legendPaint.measureText(referenceText);
-            canvas.drawText(
-                    referenceText,
-                    canvasCenter.x - (referenceTextWidth / 2),
-                    canvasCenter.y + currentReferenceCanvasUnits + legendPaint.getTextSize(),
-                    legendPaint
-            );
-        }
 
     }
 
@@ -224,6 +227,10 @@ public class BeaconRadar extends BeaconView {
     public void onDeviceLocationChanged() {
         startDeviceRadiusAnimation();
         super.onDeviceLocationChanged();
+    }
+
+    protected void refresh() {
+        invalidate();
     }
 
     protected void startMaximumDistanceAnimation(float distance) {

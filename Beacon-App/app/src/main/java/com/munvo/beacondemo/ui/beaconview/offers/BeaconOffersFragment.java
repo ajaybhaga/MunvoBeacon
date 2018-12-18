@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.munvo.beacondemo.HomeActivity;
 import com.munvo.beacondemo.ui.beaconview.BeaconViewFragment;
 import com.munvo.beaconlocate.IndoorPositioning;
 import com.munvo.beaconlocate.ble.beacon.Beacon;
@@ -97,6 +98,7 @@ public class BeaconOffersFragment extends BeaconViewFragment {
             @Override
             public void onBeaconUpdated(Beacon beacon) {
                 beaconOffers.setBeacons(getBeacons());
+                ((HomeActivity)getActivity()).getZoneDetector().getZone(getBeacons());
             }
         };
     }

@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
+import com.munvo.beacondemo.HomeActivity;
 import com.munvo.beacondemo.ZoneDetector;
 import com.munvo.beacondemo.ui.LocationAnimator;
 import com.munvo.beacondemo.ui.beaconview.BeaconView;
@@ -17,7 +18,9 @@ import com.munvo.beaconlocate.ble.advertising.AdvertisingPacket;
 import com.munvo.beaconlocate.ble.beacon.Beacon;
 import com.munvo.beaconlocate.location.Location;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,9 +36,7 @@ public class BeaconOffers extends BeaconView {
     protected Paint zone4Paint;
     protected Paint zoneTextPaint;
     protected int zone = 0;
-
-    protected ZoneDetector zoneDetector = new ZoneDetector();
-
+    protected List<String> zoneSeries = new ArrayList<String>(5);
     /*
         Device drawing related variables
      */
@@ -148,7 +149,6 @@ public class BeaconOffers extends BeaconView {
 //        canvas.drawCircle(canvasCenter.x, canvasCenter.y, pixelsPerDip * 8, secondaryFillPaint);
     }
 
-    @Override
     protected void drawBeacons(Canvas canvas) {
         Map<Beacon, PointF> beaconCenterMap = new HashMap<>();
         // draw all backgrounds
@@ -159,18 +159,6 @@ public class BeaconOffers extends BeaconView {
             drawBeaconForeground(canvas, beacon, beaconCenterMap.get(beacon));
         }
 
-        // Load zone
-        zone = zoneDetector.getZone(beacons);
-
-        // Draw zone
-        drawZone(canvas, zone);
-
-        // Zone is detected
-        // Send to Kafka
-        updateZone();
-    }
-
-    protected void updateZone() {
 
     }
 
@@ -293,7 +281,7 @@ public class BeaconOffers extends BeaconView {
         /* Global attributes */
 
         canvas.drawText(
-                "Zone Series: " + zoneDetector.getZoneSeries(),
+                "Zone Series: " + zoneSeries,
                 40,//canvasCenter.x,
                 40+(7*40)+beaconYOffset,
                 legendPaint);

@@ -72,6 +72,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class ZoneDetector {
 
+    private List<String> logBuffer;
     long lastZoneRefresh;
 
     List<Integer> zones = new ArrayList<Integer>();
@@ -97,6 +98,10 @@ public class ZoneDetector {
     float mvn2Rssi = -99.0f;
     float mvn3Rssi = -99.0f;
     float mvn4Rssi = -99.0f;
+
+    public ZoneDetector(List<String> logBuffer) {
+        this.logBuffer = logBuffer;
+    }
 
     public int getZone(List<Beacon> beacons) {
         int zone = 0;
@@ -167,15 +172,27 @@ public class ZoneDetector {
 
         // Maximum series of 4
         if (((System.currentTimeMillis()-lastZoneRefresh) > 4000.0f) || (zones.size() > 4)) {
+            logBuffer.remove(0);
             zones.remove(0);
             lastZoneRefresh = System.currentTimeMillis();
         }
 
-        if (zoneListUpdate)
-            publishZoneSeries(100, zones);
+
+
+        logBuffer.add(System.currentTimeMillis()+ ": Zone List Update ->" + getZoneSeries());
+
+        // TODO: Temp disable publish to kafka
+        //if (zoneListUpdate)
+//            publishZoneSeries(100, zones);
+
 
         return zone;
     }
+
+    public List<Integer> getZoneData() {
+        return zones;
+    }
+
 
     public String getZoneSeries() {
 
