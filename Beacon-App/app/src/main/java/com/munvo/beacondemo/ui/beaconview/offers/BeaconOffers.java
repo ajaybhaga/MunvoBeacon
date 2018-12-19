@@ -34,10 +34,21 @@ public class BeaconOffers extends BeaconView {
     protected Paint zone2Paint;
     protected Paint zone3Paint;
     protected Paint zone4Paint;
+
+    protected Paint offer1Paint;
+    protected Paint offer2Paint;
+    protected Paint offer3Paint;
+    protected Paint offer4Paint;
+
+
     protected Paint zoneTextPaint;
+    protected Paint offerTextPaint;
+
     protected int zone = 0;
+    protected String offer = "None";
     protected List<Integer> zoneSeries = new ArrayList<Integer>(5);
     protected List<String> logBuffer;
+    protected List<String> offerSeries = new ArrayList<String>(5);
 
     /*
         Device drawing related variables
@@ -100,6 +111,14 @@ public class BeaconOffers extends BeaconView {
         refresh();
     }
 
+
+    public void setOfferData(List<String> offerSeries) {
+        this.offerSeries = offerSeries;
+        offer = offerSeries.get(offerSeries.size()-1);
+        refresh();
+    }
+
+
     public void setLogBuffer(List<String> logBuffer) {
         this.logBuffer = logBuffer;
         refresh();
@@ -122,6 +141,12 @@ public class BeaconOffers extends BeaconView {
         zoneTextPaint.setColor(Color.BLACK);
         zoneTextPaint.setAlpha(90);
 
+        offerTextPaint = new Paint(textPaint);
+        offerTextPaint.setTextSize(pixelsPerDip * 10);
+        offerTextPaint.setStyle(Paint.Style.FILL);
+        offerTextPaint.setColor(Color.BLACK);
+        offerTextPaint.setAlpha(95);
+
         zone0Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         zone0Paint.setStyle(Paint.Style.FILL);
         zone0Paint.setColor(Color.rgb(90,90,90));
@@ -141,6 +166,23 @@ public class BeaconOffers extends BeaconView {
         zone4Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         zone4Paint.setStyle(Paint.Style.FILL);
         zone4Paint.setColor(Color.rgb(20,240,120));
+
+
+        offer1Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        offer1Paint.setStyle(Paint.Style.FILL);
+        offer1Paint.setColor(Color.rgb(255,0,0));
+
+        offer2Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        offer2Paint.setStyle(Paint.Style.FILL);
+        offer2Paint.setColor(Color.rgb(0,255,0));
+
+        offer3Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        offer3Paint.setStyle(Paint.Style.FILL);
+        offer3Paint.setColor(Color.rgb(0,0,255));
+
+        offer4Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        offer4Paint.setStyle(Paint.Style.FILL);
+        offer4Paint.setColor(Color.rgb(255,255,255));
 
     }
 
@@ -213,6 +255,42 @@ public class BeaconOffers extends BeaconView {
         }
 
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, zonePaint);
+
+
+        Paint offerPaint = zone0Paint;
+        int height = 0;
+
+        for (int h = 1; h < 5; h++) {
+            switch (h) {
+                case 1:
+                    offerPaint = offer1Paint;
+                    break;
+
+                case 2:
+                    offerPaint = offer2Paint;
+                    break;
+
+                case 3:
+                    offerPaint = offer3Paint;
+                    break;
+
+                case 4:
+                    offerPaint = offer4Paint;
+                    break;
+
+            }
+
+            height = h * 200;
+            rect = new RectF(canvasWidth - 120, height, canvasWidth, canvasHeight);
+
+            canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, offerPaint);
+            canvas.drawText(
+                    "OFFER " + h,
+                    canvasWidth - 100, height+40,
+                    offerTextPaint);
+
+
+        }
 
         canvas.drawText(
                 "ZONE " + zone,

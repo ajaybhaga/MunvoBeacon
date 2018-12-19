@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Created by steppschuh on 16.11.17.
+ * Created by Ajay Bhaga on 12.18.18.
  */
 
 public class BeaconLog extends BeaconView {
@@ -94,6 +94,7 @@ public class BeaconLog extends BeaconView {
 
     public void setZoneData(List<Integer> zoneSeries) {
         this.zoneSeries = zoneSeries;
+        zone = zoneSeries.get(zoneSeries.size()-1);
         refresh();
     }
 
@@ -106,8 +107,8 @@ public class BeaconLog extends BeaconView {
     @Override
     public void initialize() {
         super.initialize();
-        startMaximumDistanceAnimation(100);
-        startDeviceAngleAnimation(0);
+        //startMaximumDistanceAnimation(100);
+        //startDeviceAngleAnimation(0);
         legendPaint = new Paint(textPaint);
         legendPaint.setTextSize(pixelsPerDip * 12);
         legendPaint.setStyle(Paint.Style.FILL);
@@ -131,18 +132,18 @@ public class BeaconLog extends BeaconView {
     protected void drawLogData(Canvas canvas) {
         if ((logBuffer != null) && !logBuffer.isEmpty()) {
 
-            int numKeys = 30;
+            int numKeys = 40;
             String[] key = new String[numKeys];
             String[] value = new String[numKeys];
 
             for (int k = 0; k < Math.min(logBuffer.size(), numKeys); k++) {
-                key[k] = "[" + k + "]";
+                key[k] = "-";
                 value[k] = logBuffer.get(k);
             }
             for (int i = 0; i < Math.min(logBuffer.size(), numKeys); i++) {
                 // Show
                 canvas.drawText(
-                        key[i] + " -> " + value[i],
+                        key[i] + "" + value[i],
                         20,//canvasCenter.x,
                         80 + (i * 40),
                         legendPaint
@@ -220,69 +221,16 @@ public class BeaconLog extends BeaconView {
     public void fitToCurrentLocations() {
         float maximumDistance = 10;
         // TODO: get actual maximum distance
-        startMaximumDistanceAnimation(maximumDistance);
+        //startMaximumDistanceAnimation(maximumDistance);
     }
 
     @Override
     public void onDeviceLocationChanged() {
-        startDeviceRadiusAnimation();
+        //startDeviceRadiusAnimation();
         super.onDeviceLocationChanged();
     }
 
     protected void refresh() {
         invalidate();
     }
-
-    protected void startMaximumDistanceAnimation(float distance) {
-        float originValue = distance;
-        if (maximumDistanceAnimator != null) {
-            originValue = (float) maximumDistanceAnimator.getAnimatedValue();
-            maximumDistanceAnimator.cancel();
-        }
-        maximumDistanceAnimator = ValueAnimator.ofFloat(originValue, distance);
-        maximumDistanceAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
-        maximumDistanceAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                invalidate();
-            }
-        });
-        maximumDistanceAnimator.start();
-    }
-
-
-    protected void startDeviceRadiusAnimation() {
-        if (deviceAccuracyAnimator != null && deviceAccuracyAnimator.isRunning()) {
-            return;
-        }
-        deviceAccuracyAnimator = ValueAnimator.ofFloat(0, 1);
-        deviceAccuracyAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
-        deviceAccuracyAnimator.setRepeatCount(1);
-        deviceAccuracyAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        deviceAccuracyAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                invalidate();
-            }
-        });
-        deviceAccuracyAnimator.start();
-    }
-
-    public void startDeviceAngleAnimation(float deviceAngle) {
-        float originValue = deviceAngle;
-        if (deviceAngleAnimator != null) {
-            originValue = (float) deviceAngleAnimator.getAnimatedValue();
-            deviceAngleAnimator.cancel();
-        }
-        deviceAngleAnimator = ValueAnimator.ofFloat(originValue, deviceAngle);
-        deviceAngleAnimator.setDuration(200);
-        deviceAngleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                invalidate();
-            }
-        });
-        deviceAngleAnimator.start();
-    }
-
 }

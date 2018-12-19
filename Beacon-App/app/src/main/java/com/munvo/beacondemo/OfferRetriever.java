@@ -13,7 +13,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -24,7 +26,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class OfferRetriever {
 
     private List<String> logBuffer;
-    long lastOfferRefresh;
+    long lastOfferRefresh = 0;
     String json;
     String base64;
 
@@ -34,8 +36,15 @@ public class OfferRetriever {
 
     public int getOffers() {
 
-        if (pullOffers())
-            lastOfferRefresh = System.currentTimeMillis();
+        // Every 5 seconds
+        if ((System.currentTimeMillis()-lastOfferRefresh) > 5000.0f) {
+            if (pullOffers())
+                lastOfferRefresh = System.currentTimeMillis();
+        } else {
+            String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
+       //     logBuffer.add("[" + timeStamp + "] Waiting for 5 second refresh delay.");
+        }
+
 
         /*
         final TextView mTextView = (TextView) findViewById(R.id.text);
@@ -95,6 +104,10 @@ public class OfferRetriever {
         Log.i("Json ", json);
 */
 
+
+        String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
+
+        logBuffer.add("[" + timeStamp + "] Retrieving any offers.");
 
         // Change to
 //        DownloadTask task = new DownloadTask();

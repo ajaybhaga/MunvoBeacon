@@ -64,7 +64,9 @@ import java.nio.charset.StandardCharsets;
 
 import com.munvo.beaconlocate.ble.beacon.Beacon;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -171,16 +173,17 @@ public class ZoneDetector {
             lastZoneRefresh = System.currentTimeMillis();
         }
 
-        // Maximum series of 4
-        if (((System.currentTimeMillis()-lastZoneRefresh) > 4000.0f) || (zones.size() > 4)) {
+        // Maximum series of 4 for 30 seconds x 4 = 2 minutes retention of zone state
+        if (((System.currentTimeMillis()-lastZoneRefresh) > 30000.0f) || (zones.size() > 4)) {
             logBuffer.remove(0);
             zones.remove(0);
             lastZoneRefresh = System.currentTimeMillis();
         }
 
 
+        String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
 
-        logBuffer.add(System.currentTimeMillis()+ ": Zone List Update ->" + getZoneSeries());
+        logBuffer.add("[" + timeStamp + "] Zone List Update ->" + getZoneSeries());
 
         if (zoneListUpdate)
             publishZoneSeries(54321);
@@ -210,36 +213,38 @@ public class ZoneDetector {
 
     public void publishZoneSeries(int custId) {
 
-        String zoneSeries = "[";
-        for (int i = 0; i < zones.size(); i++) {
-            zoneSeries += String.valueOf(zones.get(i));
+        if (((System.currentTimeMillis()-lastZoneRefresh) > 5000.0f)) {
 
-            if (i != zones.size()-1)
-                zoneSeries += ",";
-        }
-        zoneSeries += "]";
+            String zoneSeries = "[";
+            for (int i = 0; i < zones.size(); i++) {
+                zoneSeries += String.valueOf(zones.get(i));
 
-        String full = String.valueOf(custId) + "," + zoneSeries;
+                if (i != zones.size() - 1)
+                    zoneSeries += ",";
+            }
+            zoneSeries += "]";
+
+            String full = String.valueOf(custId) + "," + zoneSeries;
 
 
-        System.out.println("Publishing -> " + full);
+            System.out.println("Publishing -> " + full);
 
-        byte[] data = new byte[0];
-        try {
-            data = full.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        base64 = "\"" + Base64.encodeToString(data, Base64.DEFAULT).trim();
-        Log.d("This is the FULL  ", base64);
+            byte[] data = new byte[0];
+            try {
+                data = full.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            base64 = "\"" + Base64.encodeToString(data, Base64.DEFAULT).trim();
+//        Log.d("This is the FULL  ", base64);
 
-        json = " {\n" +
-                "  \"records\": [\n" +
-                "    {\n" +
-                "      \"value\" :" + base64 + "\"" +
-                "    }\n" +
-                "  ]\n" +
-                "}\n";
+            json = " {\n" +
+                    "  \"records\": [\n" +
+                    "    {\n" +
+                    "      \"value\" :" + base64 + "\"" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}\n";
 
 
 /*
@@ -253,10 +258,15 @@ public class ZoneDetector {
                     }
                     '*/
 
-        Log.i("Json ", json);
+//        Log.i("Json ", json);
 
-        DownloadTask task = new DownloadTask();
-        task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/zone");
+            DownloadTask task = new DownloadTask();
+            task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/zone");
+        } else {
+
+            System.out.println("SKIPPING PUBLISH - TOO FAST SUBMISSION.");
+
+        }
     }
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
