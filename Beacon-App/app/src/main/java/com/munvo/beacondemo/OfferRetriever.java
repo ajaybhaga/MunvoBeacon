@@ -34,7 +34,7 @@ public class OfferRetriever {
         this.logBuffer = logBuffer;
     }
 
-    public int getOffers() {
+    public List<String> getOffers() {
 
         // Every 5 seconds
         if ((System.currentTimeMillis()-lastOfferRefresh) > 5000.0f) {
@@ -45,6 +45,15 @@ public class OfferRetriever {
        //     logBuffer.add("[" + timeStamp + "] Waiting for 5 second refresh delay.");
         }
 
+
+
+        List<String> offerList = new ArrayList<>(5);
+        offerList.add("TestOffer1");
+        offerList.add("TestOffer2");
+        offerList.add("TestOffer3");
+        offerList.add("TestOffer4");
+
+        // TODO: Retrieve offers and update offer list
 
         /*
         final TextView mTextView = (TextView) findViewById(R.id.text);
@@ -61,7 +70,7 @@ public class OfferRetriever {
 // Add the request to the RequestQueue.
         queue.add(stringRequest);*/
 
-        return 0;
+        return offerList;
     }
 
     public boolean pullOffers() {

@@ -22,6 +22,9 @@ import com.munvo.beaconlocate.location.LocationListener;
 import com.munvo.beaconlocate.location.provider.LocationProvider;
 import com.munvo.beacondemo.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BeaconOffersFragment extends BeaconViewFragment {
 
     private BeaconOffers beaconOffers;
@@ -101,6 +104,7 @@ public class BeaconOffersFragment extends BeaconViewFragment {
                 ((HomeActivity)getActivity()).getZoneDetector().getZone(getBeacons());
                 beaconOffers.setZoneData(((HomeActivity)getActivity()).getZoneDetector().getZoneData());
                 beaconOffers.setLogBuffer(((HomeActivity)getActivity()).getLogBuffer());
+                beaconOffers.setOfferData(((HomeActivity)getActivity()).getOfferRetriever().getOffers());
             }
         };
     }

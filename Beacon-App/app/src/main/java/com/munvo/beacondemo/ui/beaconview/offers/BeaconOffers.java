@@ -260,7 +260,12 @@ public class BeaconOffers extends BeaconView {
         Paint offerPaint = zone0Paint;
         int height = 0;
 
+        String offerData = "None";
         for (int h = 1; h < 5; h++) {
+            if (offerSeries.size() >= h) {
+                offerData = offerSeries.get(h - 1);
+            }
+
             switch (h) {
                 case 1:
                     offerPaint = offer1Paint;
@@ -281,12 +286,12 @@ public class BeaconOffers extends BeaconView {
             }
 
             height = h * 200;
-            rect = new RectF(canvasWidth - 120, height, canvasWidth, canvasHeight);
+            rect = new RectF(canvasWidth - 400, height, canvasWidth, canvasHeight);
 
             canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, offerPaint);
             canvas.drawText(
-                    "OFFER " + h,
-                    canvasWidth - 100, height+40,
+                    offerData,
+                    canvasWidth - 380, height+40,
                     offerTextPaint);
 
 
