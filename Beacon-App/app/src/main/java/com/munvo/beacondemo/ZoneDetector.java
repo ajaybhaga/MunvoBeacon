@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -183,11 +184,11 @@ public class ZoneDetector {
 
         String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
 
-        logBuffer.add("[" + timeStamp + "] Zone List Update ->" + getZoneSeries());
+        if (zoneListUpdate) {
 
-        if (zoneListUpdate)
-            publishZoneSeries(54321);
-
+            logBuffer.add("[" + timeStamp + "] Publishing Zone List Update ->" + getZoneSeries());
+            publishZoneSeries(321);
+        }
 
         return zone;
     }
@@ -261,7 +262,7 @@ public class ZoneDetector {
 //        Log.i("Json ", json);
 
             DownloadTask task = new DownloadTask();
-            task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/zone");
+            task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/zones");
         } else {
 
             System.out.println("SKIPPING PUBLISH - TOO FAST SUBMISSION.");
@@ -302,6 +303,8 @@ public class ZoneDetector {
 
                 return result;
             } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -114,7 +114,10 @@ public class BeaconOffers extends BeaconView {
 
     public void setOfferData(List<String> offerSeries) {
         this.offerSeries = offerSeries;
-        offer = offerSeries.get(offerSeries.size()-1);
+
+        if (!offerSeries.isEmpty()) {
+            offer = offerSeries.get(offerSeries.size() - 1);
+        }
         refresh();
     }
 
@@ -289,12 +292,31 @@ public class BeaconOffers extends BeaconView {
             rect = new RectF(canvasWidth - 400, height, canvasWidth, canvasHeight);
 
             canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, offerPaint);
-            canvas.drawText(
-                    offerData,
-                    canvasWidth - 380, height+40,
-                    offerTextPaint);
 
+            String[] token = offerData.split("\\|");
+            String custId = "-";
+            String offerName = "-";
+            String timestamp = "-";
 
+            if (token.length > 2) {
+                custId = token[0];
+                offerName = token[1];
+                timestamp = token[2];
+
+                canvas.drawText(
+                        custId,
+                        canvasWidth - 380, height + 40,
+                        offerTextPaint);
+                canvas.drawText(
+                        offerName,
+                        canvasWidth - 380, height + 60,
+                        offerTextPaint);
+                canvas.drawText(
+                        timestamp,
+                        canvasWidth - 380, height + 80,
+                        offerTextPaint);
+
+            }
         }
 
         canvas.drawText(
