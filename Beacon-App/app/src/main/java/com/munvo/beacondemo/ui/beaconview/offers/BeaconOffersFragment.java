@@ -99,6 +99,8 @@ public class BeaconOffersFragment extends BeaconViewFragment {
             public void onBeaconUpdated(Beacon beacon) {
                 beaconOffers.setBeacons(getBeacons());
                 ((HomeActivity)getActivity()).getZoneDetector().getZone(getBeacons());
+                beaconOffers.setZoneData(((HomeActivity)getActivity()).getZoneDetector().getZoneData());
+                beaconOffers.setLogBuffer(((HomeActivity)getActivity()).getLogBuffer());
             }
         };
     }

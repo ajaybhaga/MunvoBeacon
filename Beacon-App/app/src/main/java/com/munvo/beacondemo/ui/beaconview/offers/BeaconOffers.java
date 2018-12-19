@@ -36,7 +36,9 @@ public class BeaconOffers extends BeaconView {
     protected Paint zone4Paint;
     protected Paint zoneTextPaint;
     protected int zone = 0;
-    protected List<String> zoneSeries = new ArrayList<String>(5);
+    protected List<Integer> zoneSeries = new ArrayList<Integer>(5);
+    protected List<String> logBuffer;
+
     /*
         Device drawing related variables
      */
@@ -92,6 +94,17 @@ public class BeaconOffers extends BeaconView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    public void setZoneData(List<Integer> zoneSeries) {
+        this.zoneSeries = zoneSeries;
+        zone = zoneSeries.get(zoneSeries.size()-1);
+        refresh();
+    }
+
+    public void setLogBuffer(List<String> logBuffer) {
+        this.logBuffer = logBuffer;
+        refresh();
+    }
+
     @Override
     public void initialize() {
         super.initialize();
@@ -111,7 +124,7 @@ public class BeaconOffers extends BeaconView {
 
         zone0Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         zone0Paint.setStyle(Paint.Style.FILL);
-        zone0Paint.setColor(Color.rgb(10,10,10));
+        zone0Paint.setColor(Color.rgb(90,90,90));
 
         zone1Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         zone1Paint.setStyle(Paint.Style.FILL);
@@ -134,7 +147,9 @@ public class BeaconOffers extends BeaconView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        drawZone(canvas);
         drawBeaconAttributeData(canvas);
+
     }
 
     @Override
@@ -173,14 +188,14 @@ public class BeaconOffers extends BeaconView {
         //drawBeaconForeground(canvas, beacon, beaconCenter);
     }
 
-    protected void drawZone(Canvas canvas, int zone) {
+    protected void drawZone(Canvas canvas) {
 
         Paint zonePaint = zone0Paint;
         RectF rect = new RectF(0, 0, canvasWidth, canvasHeight);
 
         switch (zone) {
             case 1:
-                zonePaint = zone3Paint;
+                zonePaint = zone1Paint;
                 break;
 
             case 2:
@@ -339,6 +354,10 @@ public class BeaconOffers extends BeaconView {
         float maximumDistance = 10;
         // TODO: get actual maximum distance
         startMaximumDistanceAnimation(maximumDistance);
+    }
+
+    protected void refresh() {
+        invalidate();
     }
 
     @Override

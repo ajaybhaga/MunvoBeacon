@@ -23,9 +23,14 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class OfferRetriever {
 
+    private List<String> logBuffer;
     long lastOfferRefresh;
     String json;
+    String base64;
 
+    public OfferRetriever(List<String> logBuffer) {
+        this.logBuffer = logBuffer;
+    }
 
     public int getOffers() {
 
@@ -51,11 +56,58 @@ public class OfferRetriever {
     }
 
     public boolean pullOffers() {
+
+
+//        String full = String.valueOf(custId) + "," + zoneSeries;
+
+  //      System.out.println("Publishing -> " + full);
+
+        /*
+        byte[] data = new byte[0];
+        try {
+            data = full.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        base64 = "\"" + Base64.encodeToString(data, Base64.DEFAULT).trim();
+        Log.d("This is the FULL  ", base64);
+
+        json = " {\n" +
+                "  \"records\": [\n" +
+                "    {\n" +
+                "      \"value\" :" + base64 + "\"" +
+                "    }\n" +
+                "  ]\n" +
+                "}\n";
+
+
+/*
+                    '
+                    {
+                        "records": [
+                        {
+                            "value": "A base 64 encoded value string"
+                        }
+                        ]
+                    }
+                    '*/
+/*
+        Log.i("Json ", json);
+*/
+
+
         // Change to
-        DownloadTask task = new DownloadTask();
-        task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/offers");
+//        DownloadTask task = new DownloadTask();
+ //       task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/topics/offers");
         return true;
     }
+
+    /*
+
+    {"instance_id":"rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e0d-6204921da560-86960c03-2198-43cc-9849-7fd5fc875372",
+    "base_uri":"https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e0d-6204921da560-86960c03-2198-43cc-9849-7fd5fc875372"}
+
+     */
 
     public class DownloadTask extends AsyncTask<String, Void, String> {
 
@@ -75,9 +127,10 @@ public class OfferRetriever {
                 urlConnection.setRequestProperty("Content-Type", "application/vnd.kafka.binary.v1+json");
 
                 DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                wr.writeBytes(json);
-                wr.flush();
-                wr.close();
+//                wr.writeBytes(json);
+ //               logBuffer.add(json);
+ //               wr.flush();
+  //              wr.close();
 
                 InputStream in = urlConnection.getInputStream();
                 InputStreamReader reader = new InputStreamReader(in);

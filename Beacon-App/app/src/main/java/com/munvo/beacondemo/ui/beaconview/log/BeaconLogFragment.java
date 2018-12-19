@@ -146,9 +146,8 @@ public class BeaconLogFragment extends BeaconViewFragment {
 
     @Override
     public void onDetach() {
-        super.onDetach();
         sensorManager.unregisterListener(sensorEventListener);
-
+        super.onDetach();
     }
 
     @Override
@@ -175,9 +174,13 @@ public class BeaconLogFragment extends BeaconViewFragment {
             @Override
             public void onBeaconUpdated(Beacon beacon) {
                 beaconLog.setBeacons(getBeacons());
+                ((HomeActivity)getActivity()).getZoneDetector().getZone(getBeacons());
                 beaconLog.setZoneData(((HomeActivity)getActivity()).getZoneDetector().getZoneData());
                 beaconLog.setLogBuffer(((HomeActivity)getActivity()).getLogBuffer());
+                ((HomeActivity)getActivity()).getOfferRetriever().getOffers();
+
 //                textView.setText(((HomeActivity)getActivity()).getLogBuffer().toString());
+
             }
         };
     }

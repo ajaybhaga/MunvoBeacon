@@ -40,6 +40,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     private List<String> logBuffer;
     long lastLogRefresh = 0;
     protected ZoneDetector zoneDetector;
+    protected OfferRetriever offerRetriever;
 
 
 
@@ -60,6 +61,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
 
         logBuffer = new ArrayList<String>(100);
         zoneDetector = new ZoneDetector(logBuffer);
+        offerRetriever = new OfferRetriever(logBuffer);
 
         // setup location
         AndroidLocationProvider.initialize(this);
@@ -72,6 +74,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         return logBuffer;
     }
     public ZoneDetector getZoneDetector() { return zoneDetector; }
+    public OfferRetriever getOfferRetriever() { return offerRetriever; }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

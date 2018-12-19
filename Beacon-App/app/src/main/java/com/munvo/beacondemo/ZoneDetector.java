@@ -156,6 +156,7 @@ public class ZoneDetector {
         } else {
             zone = 1;
         }*/
+        zoneListUpdate = true;
 
         if (zones.isEmpty()) {
             zones.add(zone);
@@ -181,9 +182,8 @@ public class ZoneDetector {
 
         logBuffer.add(System.currentTimeMillis()+ ": Zone List Update ->" + getZoneSeries());
 
-        // TODO: Temp disable publish to kafka
-        //if (zoneListUpdate)
-//            publishZoneSeries(100, zones);
+        if (zoneListUpdate)
+            publishZoneSeries(54321);
 
 
         return zone;
@@ -208,7 +208,7 @@ public class ZoneDetector {
         return zoneSeries;
     }
 
-    public void publishZoneSeries(int custId, List<Integer> zones) {
+    public void publishZoneSeries(int custId) {
 
         String zoneSeries = "[";
         for (int i = 0; i < zones.size(); i++) {
