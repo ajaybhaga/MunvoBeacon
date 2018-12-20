@@ -21,6 +21,10 @@
     <!-- Log-->
     <string name="title_log">Log</string>
 
+    <!-- Buttons -->
+    <string name="clearSeries">Clear Series</string>
+    <string name="clearLogs">Clear Logs</string>
+
     <!-- Chart -->
     <string name="title_chart">Chart</string>
     <string name="axis_label_time">Time in seconds</string>

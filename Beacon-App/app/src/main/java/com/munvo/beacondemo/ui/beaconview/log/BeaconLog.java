@@ -132,7 +132,7 @@ public class BeaconLog extends BeaconView {
     protected void drawLogData(Canvas canvas) {
         if ((logBuffer != null) && !logBuffer.isEmpty()) {
 
-            int numKeys = 40;
+            int numKeys = 35;
             String[] key = new String[numKeys];
             String[] value = new String[numKeys];
 

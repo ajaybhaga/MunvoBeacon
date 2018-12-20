@@ -84,6 +84,12 @@ public class ZoneDetector {
     String name;
     //  String json;
 
+    long lastBeacon1Refresh = 0;
+    long lastBeacon2Refresh = 0;
+    long lastBeacon3Refresh = 0;
+    long lastBeacon4Refresh = 0;
+
+
     // Topics:
     // zone -> 3 mins last 5 zones
     // context -> app populate text message
@@ -116,23 +122,40 @@ public class ZoneDetector {
                 mvn1 = true;
                 mvn1Rssi = beacon.getFilteredRssi();
                 beaconNum = 1;
+                lastBeacon1Refresh = System.currentTimeMillis();
             }
             if ((beacon.getDeviceName().equalsIgnoreCase("mnvn2"))) { // mvn2
                 mvn2 = true;
                 mvn2Rssi = beacon.getFilteredRssi();
                 beaconNum = 2;
+                lastBeacon2Refresh = System.currentTimeMillis();
             }
             if ((beacon.getDeviceName().equalsIgnoreCase("mnvn3"))) { // mvn3
                 mvn3 = true;
                 mvn3Rssi = beacon.getFilteredRssi();
                 beaconNum = 3;
+                lastBeacon3Refresh = System.currentTimeMillis();
             }
             if ((beacon.getDeviceName().equalsIgnoreCase("mnvn4"))) { // mvn4
                 mvn4 = true;
                 mvn4Rssi = beacon.getFilteredRssi();
                 beaconNum = 4;
+                lastBeacon4Refresh = System.currentTimeMillis();
             }
 
+        }
+
+        if ((System.currentTimeMillis()-lastBeacon1Refresh) > 2000.0f) {
+            mvn1Rssi = -999.00f;
+        }
+        if ((System.currentTimeMillis()-lastBeacon2Refresh) > 2000.0f) {
+            mvn2Rssi = -999.00f;
+        }
+        if ((System.currentTimeMillis()-lastBeacon3Refresh) > 2000.0f) {
+            mvn3Rssi = -999.00f;
+        }
+        if ((System.currentTimeMillis()-lastBeacon4Refresh) > 2000.0f) {
+            mvn4Rssi = -999.00f;
         }
 
         boolean zoneListUpdate = false;
@@ -186,11 +209,17 @@ public class ZoneDetector {
 
         if (zoneListUpdate) {
 
-            logBuffer.add("[" + timeStamp + "] Publishing Zone List Update ->" + getZoneSeries());
-            publishZoneSeries(321);
+            if (getZoneData().size() > 2) {
+                logBuffer.add("[" + timeStamp + "] Publishing Zone List Update ->" + getZoneSeries());
+                publishZoneSeries(321);
+            }
         }
 
         return zone;
+    }
+
+    public void clear() {
+        zones.clear();
     }
 
     public List<Integer> getZoneData() {

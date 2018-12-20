@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.munvo.beacondemo.bluetooth.BluetoothClient;
@@ -24,7 +25,9 @@ import com.munvo.beacondemo.ui.beaconview.log.BeaconLogFragment;
 import com.munvo.beacondemo.ui.beaconview.offers.BeaconOffersFragment;
 import com.munvo.beacondemo.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -68,6 +71,25 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
 
         // setup bluetooth
         BluetoothClient.initialize(this);
+
+        final Button clearSeriesButton = findViewById(R.id.clearSeriesButton);
+        clearSeriesButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                getZoneDetector().clear();
+                String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
+                logBuffer.add("[" + timeStamp + "] Cleared zone series ->" + getZoneDetector().getZoneSeries());
+            }
+        });
+
+        final Button clearLogsButton = findViewById(R.id.clearLogsButton);
+        clearLogsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                logBuffer.clear();
+            }
+        });
+
     }
 
     public List<String> getLogBuffer() {

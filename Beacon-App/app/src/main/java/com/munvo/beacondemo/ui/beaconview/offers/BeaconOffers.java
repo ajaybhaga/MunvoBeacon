@@ -145,7 +145,7 @@ public class BeaconOffers extends BeaconView {
         zoneTextPaint.setAlpha(90);
 
         offerTextPaint = new Paint(textPaint);
-        offerTextPaint.setTextSize(pixelsPerDip * 10);
+        offerTextPaint.setTextSize(pixelsPerDip * 12);
         offerTextPaint.setStyle(Paint.Style.FILL);
         offerTextPaint.setColor(Color.BLACK);
         offerTextPaint.setAlpha(95);
@@ -304,16 +304,16 @@ public class BeaconOffers extends BeaconView {
                 timestamp = token[2];
 
                 canvas.drawText(
-                        custId,
+                        "User Id: " + custId,
                         canvasWidth - 380, height + 40,
                         offerTextPaint);
                 canvas.drawText(
-                        offerName,
-                        canvasWidth - 380, height + 60,
+                        "Offer: " + offerName,
+                        canvasWidth - 380, height + 80,
                         offerTextPaint);
                 canvas.drawText(
-                        timestamp,
-                        canvasWidth - 380, height + 80,
+                        "Timestamp: " + timestamp,
+                        canvasWidth - 380, height + 120,
                         offerTextPaint);
 
             }

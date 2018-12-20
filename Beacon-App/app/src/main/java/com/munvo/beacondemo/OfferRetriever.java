@@ -32,8 +32,6 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-//import java.util.jar.Manifest;
-
 
 public class OfferRetriever {
 
@@ -84,95 +82,25 @@ public class OfferRetriever {
 
     public boolean pullOffers() {
 
-
-//        String full = String.valueOf(custId) + "," + zoneSeries;
-
-  //      System.out.println("Publishing -> " + full);
-
-       /*
-        byte[] data = new byte[0];
-        try {
-            data = full.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        base64 = "\"" + Base64.encodeToString(data, Base64.DEFAULT).trim();
-        Log.d("This is the FULL  ", base64);
-
-        json = " {\n" +
-                "  \"records\": [\n" +
-                "    {\n" +
-                "      \"value\" :" + base64 + "\"" +
-                "    }\n" +
-                "  ]\n" +
-                "}\n";
-
-
-
-                    '
-                    {
-                        "records": [
-                        {
-                            "value": "A base 64 encoded value string"
-                        }
-                        ]
-                    }
-                    '*/
-/*
-        Log.i("Json ", json);
-*/
-
-
         String timeStamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
 
-        logBuffer.add("[" + timeStamp + "] Retrieving any offers.");
+        logBuffer.add("[" + timeStamp + "] Retrieving any available offers.");
 
-        logBuffer.add("[" + timeStamp + "]: " + " Connecting to https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/ajay_test_consumer01/topics/offers");
+        logBuffer.add("[" + timeStamp + "]: " + " Connecting to https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/ajay_test_consumer02/topics/offers");
 
         DownloadTask task = new DownloadTask();
-        task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/ajay_test_consumer01/topics/offers");
+        task.execute("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/ajay_test_consumer02/topics/offers");
 
 
    //     "instance_id": "ajay_test_consumer01",
  //               "base_uri": "https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/ajay_test_consumer01"
 
-/*
-        try {
-
-            URL url = new URL("https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e0d-6204921da560-86960c03-2198-43cc-9849-7fd5fc875372/topics/offers");
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            int statusCode = urlConnection.getResponseCode();
-
-            if (statusCode == 200) {
-                InputStream it = new BufferedInputStream(urlConnection.getInputStream());
-                InputStreamReader read = new InputStreamReader(it);
-                BufferedReader buff = new BufferedReader(read);
-                StringBuilder dta = new StringBuilder();
-                String chunks;
-                logBuffer.add("[" + timeStamp + "]: statusCode ->" + statusCode);
-
-
-                while ((chunks = buff.readLine()) != null) {
-                    dta.append(chunks);
-                    System.out.println(dta);
-                    logBuffer.add("[" + timeStamp + "]: Data ->" + dta);
-                }
-            } else {
-                //Handle else
-                logBuffer.add("[" + timeStamp + "]: statusCode ->" + statusCode);
-            }
-        } catch (Exception e) {
-            //   System.out.println(e.fillInStackTrace());
-
-            String message = getStackTrace(e);
-
-            logBuffer.add("[" + timeStamp + "]: Exception ->" + message);
-        }*/
-
         return true;
     }
 
+    public void clearOfferList() {
+        offerList.clear();
+    }
 
     public static String getStackTrace(final Throwable throwable) {
         final StringWriter sw = new StringWriter();
@@ -181,19 +109,7 @@ public class OfferRetriever {
         return sw.getBuffer().toString();
     }
 
-
-    /*
-
-json =    {"instance_id":"rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e0d-6204921da560-86960c03-2198-43cc-9849-7fd5fc875372",
-    "base_uri":"https://kafka-rest-prod02.messagehub.services.us-south.bluemix.net:443/consumers/mytestconsumers/instances/rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e0d-6204921da560-86960c03-2198-43cc-9849-7fd5fc875372"}
-
-     */
-
-
-
-
     public class DownloadTask extends AsyncTask<String, Void, String> {
-
 
         @Override
         protected String doInBackground(String... urls) {
@@ -232,7 +148,6 @@ json =    {"instance_id":"rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e
                     if (dta.length() > 5) {
                         logBuffer.add("[" + timeStamp + "]: Data ->" + dta);
 
-
                         String text;
                         try {
 
@@ -240,27 +155,20 @@ json =    {"instance_id":"rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e
                             JSONObject json2 = json.getJSONObject(0);
                             text = (String) json2.get("value");
 
-//                        JSONObject jsonObject = new JSONObject();
-                            //                      JSONObject myResponse = jsonObject.getJSONObject("data");
-                            //                    JSONArray valueResponse = (JSONArray) myResponse.get("value");
-//
-
                             String base64 = text;
                             // Receiving side
                             byte[] data = Base64.decode(base64, Base64.DEFAULT);
                             String decodedText = new String(data, "UTF-8");
 
+                            logBuffer.add("[" + timeStamp + "]: pullOffers [value] ->" + decodedText);
 
-                            logBuffer.add("[" + timeStamp + "]: myResponse [value] ->" + decodedText);
-
-
-
+                            // Add to offer list
                             offerList.add(decodedText);
-                           if (offerList.size() > 5) {
+
+                            // Shift lift if we more than 4
+                           if (offerList.size() > 4) {
                                offerList.remove(0);
                            }
-
-                            //                }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -279,25 +187,6 @@ json =    {"instance_id":"rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e
                 }
 
 
-//
-//
-// DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-//                wr.writeBytes(json);
- //               logBuffer.add(json);                int statusCode = urlConnection.getResponseCode();
-
- //               wr.flush();
-  //              wr.close();
-
-/*
-                InputStream in = urlConnection.getInputStream();
-                InputStreamReader reader = new InputStreamReader(in);
-                int data = reader.read();
-                while (data != -1) {
-                    char current = (char) data;
-                    result += current;
-                    data = reader.read();
-                }
-*/
                 return result;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -317,5 +206,4 @@ json =    {"instance_id":"rest-consumer-kafka-rest-consume.eed03688-02c0-11e9-8e
 
         }
     }
-
 }

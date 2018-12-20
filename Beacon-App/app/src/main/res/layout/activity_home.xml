@@ -9,6 +9,29 @@
         android:layout_height="match_parent"
         tools:context="com.munvo.beacondemo.HomeActivity">
 
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container2"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context="com.munvo.beacondemo.HomeActivity">
+
+    <Button
+        android:id="@+id/clearSeriesButton"
+        android:layout_height="wrap_content"
+        android:layout_width="400px"
+        android:text="@string/clearSeries" />
+
+    <Button
+        android:id="@+id/clearLogsButton"
+        android:layout_height="wrap_content"
+        android:layout_width="400px"
+        android:text="@string/clearLogs" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/textStatus"
         android:layout_width="match_parent"
